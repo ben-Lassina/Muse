@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Animaties met vragen</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      overflow: hidden; font-family: sans-serif; background: black;
+    }
+    #animatie {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      object-fit: cover; z-index: 0;
+    }
+    #vraag-container {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      display: none; flex-direction: column; justify-content: center;
+      align-items: center; background-color: rgba(0,0,0,0.7);
+      color: white; z-index: 2; font-size: 1.5rem;
+    }
+    .vraag { margin: 20px; text-align: center; }
+    button {
+      margin: 10px; padding: 12px 24px; font-size: 1rem;
+      border: none; border-radius: 8px;
+      background-color: #007bff; color: white; cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+
+    #verbindKnop {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      background-color: #28a745;
+    }
+
+    #verbindKnop:hover {
+      background-color: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+
+<video id="animatie" autoplay muted playsinline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback"></video>
+
+<div id="vraag-container">
+  <div class="vraag" id="vraag1">
+    <p>Wat vond je van de animatie?</p>
+    <button onclick="beantwoordVraag(1)">Goed</button>
+    <button onclick="beantwoordVraag(1)">Slecht</button>
+  </div>
+  <div class="vraag" id="vraag2" style="display:none;">
+    <p>Zou jij AI voor de klas willen?</p>
+    <button onclick="beantwoordVraag(2)">Ja</button>
+    <button onclick="beantwoordVraag(2)">Nee</button>
+  </div>
+  <div class="vraag" id="vraag3" style="display:none;">
+    <p>Lijkt het jou verstandig om AI voor de klas te hebben?</p>
+    <button onclick="beantwoordVraag(3)">Ja</button>
+    <button onclick="beantwoordVraag(3)">Nee</button>
+  </div>
+  <div class="vraag" id="vraag4" style="display:none;">
+    <p>Heb jij zelf ooit AI gebruikt?</p>
+    <button onclick="beantwoordVraag(4)">Ja</button>
+    <button onclick="beantwoordVraag(4)">Nee</button>
+  </div>
+</div>
+
+<!-- Tijdelijke verbindknop -->
+<button id="verbindKnop">Verbind met Arduino</button>
+
+<script>
+  const video = document.getElementById("animatie");
+  const vragen = document.getElementById("vraag-container");
+  const videoBestanden = ["VideoMuse.mp4"];
+  let index = 0;
+  let vragenActief = false;
+
+  function speelVolgendeVideo() {
+    if (index < videoBestanden.length) {
+      video.src = videoBestanden[index];
+      video.play();
+      index++;
+    } else {
+      toonVragen();
+    }
+  }
+
+  video.addEventListener("ended", () => {
+    if (!vragenActief) speelVolgendeVideo();
+  });
+
+  function toonVragen() {
+    vragen.style.display = "flex";
+    document.getElementById("vraag1").style.display = "block";
+    document.getElementById("vraag2").style.display = "none";
+    document.getElementById("vraag3").style.display = "none";
+    document.getElementById("vraag4").style.display = "none";
+    vragenActief = true;
+  }
+
+  function beantwoordVraag(nr) {
+    document.getElementById(`vraag${nr}`).style.display = "none";
+    if (nr === 1) {
+      document.getElementById("vraag2").style.display = "block";
+    } else if (nr === 2) {
+      document.getElementById("vraag3").style.display = "block";
+    } else if (nr === 3) {
+      document.getElementById("vraag4").style.display = "block";
+    } else if (nr === 4) {
+      vragen.style.display = "none";
+      index = 0;
+      vragenActief = false;
+      speelVolgendeVideo();
+    }
+  }
+
+  speelVolgendeVideo();
+
+  // ==== ARDUINO SERIAL LOGICA ====
+  let poort, lezer;
+
+  async function verbindMetArduino(poortInput) {
+    try {
+      poort = poortInput;
+      await poort.open({ baudRate: 19200 });
+
+      const decoder = new TextDecoderStream();
+      poort.readable.pipeTo(decoder.writable);
+      const inputStream = decoder.readable;
+      lezer = inputStream.getReader();
+
+      leesKnoppen();
+    } catch (err) {
+      console.error("Verbinding mislukt:", err);
+    }
+  }
+
+  async function leesKnoppen() {
+    while (true) {
+      const { value, done } = await lezer.read();
+      if (done) break;
+      if (value) verwerkInput(value.trim());
+    }
+  }
+
+  function verwerkInput(data) {
+    const zichtbareVraag = document.querySelector(".vraag:not([style*='display: none'])");
+    if (!zichtbareVraag) return;
+    const knoppen = zichtbareVraag.querySelectorAll("button");
+    if (data === "A" && knoppen[0]) knoppen[0].click();
+    if (data === "B" && knoppen[1]) knoppen[1].click();
+  }
+
+  // Knop-handler
+  document.getElementById("verbindKnop").addEventListener("click", async () => {
+    try {
+      const geselecteerdePoort = await navigator.serial.requestPort();
+      await verbindMetArduino(geselecteerdePoort);
+      document.getElementById("verbindKnop").remove();
+    } catch (err) {
+      console.error("Kon geen poort kiezen:", err);
+    }
+  });
+
+  // Probeer automatisch te verbinden bij reload
+  window.addEventListener("DOMContentLoaded", async () => {
+    const poorten = await navigator.serial.getPorts();
+    if (poorten.length > 0) {
+      await verbindMetArduino(poorten[0]);
+      document.getElementById("verbindKnop").remove();
+    }
+  });
+</script>
+
+</body>
+</html>
