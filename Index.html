@@ -25,7 +25,7 @@
       background-color: #007bff; color: white; cursor: pointer;
     }
     button:hover { background-color: #0056b3; }
-
+ 
     #verbindKnop {
       position: absolute;
       top: 20px;
@@ -33,50 +33,58 @@
       z-index: 10;
       background-color: #28a745;
     }
-
+ 
     #verbindKnop:hover {
       background-color: #1e7e34;
     }
   </style>
 </head>
 <body>
-
+ 
 <video id="animatie" autoplay muted playsinline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback"></video>
-
+ 
 <div id="vraag-container">
   <div class="vraag" id="vraag1">
     <p>Wat vond je van de animatie?</p>
-    <button onclick="beantwoordVraag(1)">Goed</button>
-    <button onclick="beantwoordVraag(1)">Slecht</button>
+    <button onclick="beantwoordVraagBlue(1)">Goed</button>
+    <button onclick="beantwoordVraagRed(1)">Slecht</button>
   </div>
   <div class="vraag" id="vraag2" style="display:none;">
     <p>Zou jij AI voor de klas willen?</p>
-    <button onclick="beantwoordVraag(2)">Ja</button>
-    <button onclick="beantwoordVraag(2)">Nee</button>
+    <button onclick="beantwoordVraagBlue(2)">Ja</button>
+    <button onclick="beantwoordVraagRed(2)">Nee</button>
   </div>
   <div class="vraag" id="vraag3" style="display:none;">
     <p>Lijkt het jou verstandig om AI voor de klas te hebben?</p>
-    <button onclick="beantwoordVraag(3)">Ja</button>
-    <button onclick="beantwoordVraag(3)">Nee</button>
+    <button onclick="beantwoordVraagBlue(3)">Ja</button>
+    <button onclick="beantwoordVraagRed(3)">Nee</button>
   </div>
   <div class="vraag" id="vraag4" style="display:none;">
     <p>Heb jij zelf ooit AI gebruikt?</p>
-    <button onclick="beantwoordVraag(4)">Ja</button>
-    <button onclick="beantwoordVraag(4)">Nee</button>
+    <button onclick="beantwoordVraagBlue(4, 1)">Ja</button>
+    <button onclick="beantwoordVraagRed(4, 2)">Nee</button>
+  </div>
+  <div class="vraag" id="totaal" style="display:none;">
+    <p>Dit is wat mensen hebben beantwoord</p>
+    <p id="antwoordBlauw"></p>
+    <p id="antwoordRood"></p>
+    <button id="restart" onclick="speelVolgendeVideo()">Druk op een knop om opnieuw te starten</button>
+    <button style="display: none;" id="restart" onclick="speelVolgendeVideo()">Druk op een knop om opnieuw te starten</button>
   </div>
 </div>
-
+ 
 <!-- Tijdelijke verbindknop -->
 <button id="verbindKnop">Verbind met Arduino</button>
-
+ 
 <script>
   const video = document.getElementById("animatie");
   const vragen = document.getElementById("vraag-container");
   const videoBestanden = ["VideoMuse.mp4"];
   let index = 0;
   let vragenActief = false;
-
+ 
   function speelVolgendeVideo() {
+    hideTotal();
     if (index < videoBestanden.length) {
       video.src = videoBestanden[index];
       video.play();
@@ -85,11 +93,11 @@
       toonVragen();
     }
   }
-
+ 
   video.addEventListener("ended", () => {
     if (!vragenActief) speelVolgendeVideo();
   });
-
+ 
   function toonVragen() {
     vragen.style.display = "flex";
     document.getElementById("vraag1").style.display = "block";
@@ -98,8 +106,17 @@
     document.getElementById("vraag4").style.display = "none";
     vragenActief = true;
   }
+ 
+  function beantwoordVraagBlue(nr, answer) {
+      if( localStorage.getItem('blueAnswer') === null) {
+      localStorage.setItem('blueAnswer', 0);
+    }
+    // sla antwoord op of verwerk het hier indien nodig
+    let saveBlue = parseInt(localStorage.getItem('blueAnswer'));
+    saveBlue++
+    localStorage.setItem('blueAnswer', saveBlue);
+    console.log(`blue: ${localStorage.getItem('blueAnswer')}`);
 
-  function beantwoordVraag(nr) {
     document.getElementById(`vraag${nr}`).style.display = "none";
     if (nr === 1) {
       document.getElementById("vraag2").style.display = "block";
@@ -108,34 +125,78 @@
     } else if (nr === 3) {
       document.getElementById("vraag4").style.display = "block";
     } else if (nr === 4) {
-      vragen.style.display = "none";
       index = 0;
       vragenActief = false;
-      speelVolgendeVideo();
+      showTotal();
     }
   }
+ 
+    function beantwoordVraagRed(nr, answer) {
+      if( localStorage.getItem('redAnswer') === null) {
+      localStorage.setItem('redAnswer', 0);
+    }
+    // sla antwoord op of verwerk het hier indien nodig
+    let saveRed = parseInt(localStorage.getItem('redAnswer'));
+    saveRed++
+    localStorage.setItem('redAnswer', saveRed);
+    console.log(`red: ${localStorage.getItem('redAnswer')}`);
 
+    document.getElementById(`vraag${nr}`).style.display = "none";
+    if (nr === 1) {
+      document.getElementById("vraag2").style.display = "block";
+    } else if (nr === 2) {
+      document.getElementById("vraag3").style.display = "block";
+    } else if (nr === 3) {
+      document.getElementById("vraag4").style.display = "block";
+    } else if (nr === 4) {
+      index = 0;
+      vragenActief = false;
+      showTotal();
+    }
+  }
+ 
+ function showTotal(){
+  let totaal = document.getElementById('totaal');
+  totaal.style.display = 'block';
+  let antwoordBlauw = document.getElementById('antwoordBlauw');
+  let antwoordRood = document.getElementById('antwoordRood');
+  antwoordBlauw.innerHTML = `blauw: ${localStorage.getItem('blueAnswer')}`;
+  antwoordRood.innerHTML = `rood: ${localStorage.getItem('redAnswer')}`;
+  antwoordBlauw.style.display = 'block';
+  antwoordRood.style.display = 'block';
+ }
+
+ function hideTotal(){
+  let vragen = document.getElementById('vraag-container')
+  let totaal = document.getElementById('totaal')
+  totaal.style.display = "none"
+  vragen.style.display = "none";
+ }
+ 
+    
+ 
+ 
   speelVolgendeVideo();
-
+ 
   // ==== ARDUINO SERIAL LOGICA ====
   let poort, lezer;
-
+ 
   async function verbindMetArduino(poortInput) {
     try {
       poort = poortInput;
       await poort.open({ baudRate: 19200 });
-
+ 
       const decoder = new TextDecoderStream();
       poort.readable.pipeTo(decoder.writable);
       const inputStream = decoder.readable;
       lezer = inputStream.getReader();
-
+ 
       leesKnoppen();
     } catch (err) {
       console.error("Verbinding mislukt:", err);
     }
   }
-
+ 
   async function leesKnoppen() {
     while (true) {
       const { value, done } = await lezer.read();
@@ -143,7 +204,7 @@
       if (value) verwerkInput(value.trim());
     }
   }
-
+ 
   function verwerkInput(data) {
     const zichtbareVraag = document.querySelector(".vraag:not([style*='display: none'])");
     if (!zichtbareVraag) return;
@@ -151,7 +212,7 @@
     if (data === "A" && knoppen[0]) knoppen[0].click();
     if (data === "B" && knoppen[1]) knoppen[1].click();
   }
-
+ 
   // Knop-handler
   document.getElementById("verbindKnop").addEventListener("click", async () => {
     try {
@@ -162,7 +223,7 @@
       console.error("Kon geen poort kiezen:", err);
     }
   });
-
+ 
   // Probeer automatisch te verbinden bij reload
   window.addEventListener("DOMContentLoaded", async () => {
     const poorten = await navigator.serial.getPorts();
@@ -172,6 +233,7 @@
     }
   });
 </script>
-
+ 
 </body>
 </html>
+ 
