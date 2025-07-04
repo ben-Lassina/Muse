@@ -25,6 +25,9 @@ video.addEventListener("ended", () => {
     if (!vragenActief) speelVolgendeVideo();
 });
 
+/**
+ * Start de applicatie en toon de eerste video
+ */
 function toonVragen() {
     start.style.display                             = "none";
     vragen.style.display                            = "flex";
@@ -37,6 +40,9 @@ function toonVragen() {
     videoActive  = false;
 }
 
+/**
+ * Start de applicatie en toon de startscherm
+ */
 function toonStart() {
     hideTotal();
     index                = 0;
@@ -73,6 +79,10 @@ function beantwoordVraagRed(nr, answer) {
     displayQuestion(nr);
 }
 
+/**
+ * Toon de volgende vraag
+ * @param nr
+ */
 function displayQuestion(nr) {
     let vraag = document.getElementById(`vraag${nr}`);
     if (vraag) {
@@ -109,6 +119,9 @@ function hideTotal() {
     start.style.display  = "none";
 }
 
+/**
+ * Reset de applicatie to the startscreen
+ */
 function setLocalTimeout() {
     if (undefined !== myTimeout) clearTimeout(myTimeout);
     myTimeout = setTimeout(toonStart, 5 * 60 * 1000); // 10 min
@@ -121,7 +134,7 @@ function setLocalTimeout() {
 const startTimeout = setTimeout(prepStart, 10000);
 
 function prepStart() {
-    console.log('prepStart');
+    console.log('Start de applicatie');
     clearTimeout(startTimeout);
     toonStart();
 }
