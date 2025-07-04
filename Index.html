@@ -8,6 +8,15 @@
       margin: 0; padding: 0; height: 100%;
       overflow: hidden; font-family: sans-serif; background: black;
     }
+    body  {
+      background: url('./background.png') no-repeat top center;
+    }
+    #start-container {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      display: none; flex-direction: column; justify-content: center;
+      align-items: center; background-color: rgba(0,0,0,0.7);
+      color: white; z-index: 2; font-size: 1.5rem;
+    }
     #animatie {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       object-fit: cover; z-index: 0;
@@ -15,10 +24,17 @@
     #vraag-container {
       position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       display: none; flex-direction: column; justify-content: center;
-      align-items: center; background-color: rgba(0,0,0,0.7);
+      align-items: center; background-color: rgba(110, 57, 79, 0.397);
       color: white; z-index: 2; font-size: 1.5rem;
     }
-    .vraag { margin: 20px; text-align: center; }
+    .vraag { 
+      height: 9rem; margin-top: -8rem; margin-left: 2rem; width: 74rem;
+      text-align: center; background-color: rgba(32, 94, 30, 0.5); padding: 4rem 0;
+    }
+    #vraag0 {
+      margin-top: -7rem; margin-left: -6rem; height: 16rem;
+      background-color: transparent;
+    }
     button {
       margin: 10px; padding: 12px 24px; font-size: 1rem;
       border: none; border-radius: 8px;
@@ -40,6 +56,13 @@
   </style>
 </head>
 <body>
+<div id="start-container">
+  <div class="vraag" id="vraag0">
+    <p>Hoe denk jij over AI in het onderwijs?</p> 
+    <button id="restart" onclick="speelVolgendeVideo()">Druk op een knop om te starten</button>
+
+  </div>
+</div>
  
 <video id="animatie" autoplay muted playsinline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback"></video>
  
@@ -79,6 +102,7 @@
 <script>
   const video = document.getElementById("animatie");
   const vragen = document.getElementById("vraag-container");
+  const start = document.getElementById("start-container");
   const videoBestanden = ["VideoMuse.mp4"];
   let index = 0;
   let vragenActief = false;
@@ -99,12 +123,19 @@
   });
  
   function toonVragen() {
+    start.style.display = "none";
     vragen.style.display = "flex";
     document.getElementById("vraag1").style.display = "block";
     document.getElementById("vraag2").style.display = "none";
     document.getElementById("vraag3").style.display = "none";
     document.getElementById("vraag4").style.display = "none";
     vragenActief = true;
+  }
+ 
+  function toonStart() {
+    start.style.display = "flex";
+    vragen.style.display = "none";
+    vragenActief = false;
   }
  
   function beantwoordVraagBlue(nr, answer) {
@@ -171,12 +202,13 @@
   let totaal = document.getElementById('totaal')
   totaal.style.display = "none"
   vragen.style.display = "none";
+  start.style.display = "none";
  }
  
     
  
  
-  speelVolgendeVideo();
+  toonStart();
  
   // ==== ARDUINO SERIAL LOGICA ====
   let poort, lezer;
@@ -193,11 +225,12 @@
  
       leesKnoppen();
     } catch (err) {
-      console.error("Verbinding mislukt:", err);
+      console.error("Verbinding met Arduinor mislukt:", err);
     }
   }
  
   async function leesKnoppen() {
+    console.error("Knoppen verbonden");
     while (true) {
       const { value, done } = await lezer.read();
       if (done) break;
@@ -208,6 +241,10 @@
   function verwerkInput(data) {
     const zichtbareVraag = document.querySelector(".vraag:not([style*='display: none'])");
     if (!zichtbareVraag) return;
+    if ('vraag0'===zichtbareVraag) {
+      speelVolgendeVideo();
+      return;
+    }
     const knoppen = zichtbareVraag.querySelectorAll("button");
     if (data === "A" && knoppen[0]) knoppen[0].click();
     if (data === "B" && knoppen[1]) knoppen[1].click();

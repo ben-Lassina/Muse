@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # === PAD NAAR HTML-BESTAND (PAS AAN ALS NODIG) ===
-HTML_PATH="C:\Users\SD003\Desktop\Muse\Index.html"
+HTML_PATH="C:\Users\SD003\Desktop\Muse\Muse\Index.html"
 
 # === PAD NAAR CHROME.EXE (PAS AAN ALS NODIG) ===
 CHROME_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
