@@ -1,0 +1,99 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: sans-serif;
+    background: black;
+}
+
+body {
+    background: url('./background.png') no-repeat top center;
+}
+
+#start-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    z-index: 2;
+    font-size: 1.5rem;
+}
+
+#animatie {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 0;
+}
+
+#vraag-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(110, 57, 79, 0.397);
+    color: white;
+    z-index: 2;
+    font-size: 1.5rem;
+}
+
+.vraag {
+    height: 9rem;
+    margin-top: -8rem;
+    margin-left: 2rem;
+    width: 74rem;
+    text-align: center;
+    background-color: rgba(32, 94, 30, 0.5);
+    padding: 4rem 0;
+}
+
+#vraag0 {
+    margin-top: -7rem;
+    margin-left: -6rem;
+    height: 16rem;
+    background-color: transparent;
+}
+
+button {
+    margin: 10px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#verbindKnop {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    background-color: #28a745;
+}
+
+#verbindKnop:hover {
+    background-color: #1e7e34;
+}
