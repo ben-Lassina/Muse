@@ -267,7 +267,7 @@
 
     function setLocalTimeout() {
       if (undefined !== myTimeout) clearTimeout(myTimeout);
-      myTimeout = setTimeout(toonStart, 30000);
+      myTimeout = setTimeout(toonStart, 5*60*1000); // 10 min 
     }
 
     const startTimeout = setTimeout(prepStart, 3000);
