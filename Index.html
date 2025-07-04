@@ -296,7 +296,7 @@
     }
 
     async function leesKnoppen() {
-      console.error("Knoppen verbonden");
+      console.log("Knoppen verbonden");
       while (true) {
         const { value, done } = await lezer.read();
         if (done) break;
@@ -306,8 +306,8 @@
 
     function verwerkInput(data) {
       const zichtbareStart = document.querySelector(".start:not([style*='display: none'])");
-      if (!vragenActief) {
-        speelVolgendeVideo();
+      if (!vragenActief && zichtbareStart &&zichtbareStart.id === 'vraag0') {
+        zichtbareStart.querySelector('button').click();
         return;
       }
       const zichtbareVraag = document.querySelector(".vraag:not([style*='display: none'])");
